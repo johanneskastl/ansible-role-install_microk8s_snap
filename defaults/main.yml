@@ -1,0 +1,5 @@
+---
+# install_microk8s_snap/defaults/main.yml
+
+install_microk8s_snap_enable_hostpath_storage_addon: true
+install_microk8s_snap_enable_ingress_addon: true
