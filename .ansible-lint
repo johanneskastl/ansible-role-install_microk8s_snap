@@ -2,3 +2,6 @@
 # https://github.com/ansible/ansible-lint/issues/3645
 exclude_paths:
   - .github
+
+skip_list:
+  - no-changed-when
