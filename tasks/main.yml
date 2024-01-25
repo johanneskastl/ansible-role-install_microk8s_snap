@@ -1,0 +1,49 @@
+---
+# install_microk8s_snap/tasks/main.yml
+
+- name: 'Install the actual snap package'
+  ansible.builtin.package:
+    name: snap
+    update_cache: true
+
+- name: 'Install microk8s'
+  community.general.snap:
+    name: microk8s
+    classic: true
+  register: microk8s_installation
+  # work around the 'too early for operation' error by retrying multiple times
+  until: 'not microk8s_installation.failed | bool'
+  retries: 19
+  delay: 30
+
+#
+# microk8s addons
+#
+
+- name: 'Check microk8s hostpath-storage status'
+  ansible.builtin.command:
+    cmd: 'microk8s status -a hostpath-storage'
+  changed_when: false
+  failed_when: false
+  register: microk8s_hostpath_storage_status
+
+- name: 'Enable microk8s hostpath-storage addon'
+  ansible.builtin.command:
+    cmd: 'microk8s enable hostpath-storage'
+  when:
+    - install_microk8s_snap_enable_hostpath_storage_addon | bool
+    - not microk8s_hostpath_storage_status.stdout == "enabled"
+
+- name: 'Check microk8s ingress status'
+  ansible.builtin.command:
+    cmd: 'microk8s status -a ingress'
+  changed_when: false
+  failed_when: false
+  register: microk8s_ingress_status
+
+- name: 'Enable microk8s ingress addon'
+  ansible.builtin.command:
+    cmd: 'microk8s enable ingress'
+  when:
+    - install_microk8s_snap_enable_ingress_addon | bool
+    - not microk8s_ingress_status.stdout == "enabled"
